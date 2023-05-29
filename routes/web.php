@@ -1,6 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\VariantController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\BlogCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -8,11 +14,23 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
 |
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->to('/login');
+});
+
+Auth::routes();
+
+Route::get('/home', [HomeController::class,'index'])->name('home');
+Route::post('/dropzone', [HomeController::class,'index'])->name('file-upload');
+
+Route::middleware('auth')->group(function () {
+    Route::resource('product-variant', VariantController::class);
+    Route::resource('product', ProductController::class);
+    Route::resource('blog', BlogController::class);
+    Route::resource('blog-category', BlogCategoryController::class);
 });

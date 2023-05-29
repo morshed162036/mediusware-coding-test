@@ -1,0 +1,1 @@
+product_variant[0][option]=1&product_variant[0][value][]=r&product_variant[0][value][]=b&product_variant[1][option]=2&product_variant[1][value][]=sm&product_variant[1][value][]=l
