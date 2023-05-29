@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Variant;
 use App\Models\ProductVariant;
+use App\Models\ProductVariantPrice;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -73,51 +74,60 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-         unset($variantOpt);
          $variantOpt = array();
          $variantPreview = array();
          $previewCount = 0;
-        //echo gettype($request->product_variant);
-         //dd($request->all());
-         //$product = Product::create(['title'=>$request->product_name,'sku'=>$request->product_sku,'description'=>$request->product_description ]);
-         //$productId = $product->id;
-         $productId = 12;
-        // $product_name = $request->product_name;
-        // $product_sku = $request->product_sku;
-        // $product_description = $request->product_description;
-        //dd(count($request->product_variant));
+
+         $product = Product::create(['title'=>$request->product_name,'sku'=>$request->product_sku,'description'=>$request->product_description ]);
+         $productId = $product->id;
+         
         if(count($request->product_variant) > 0){
             foreach ($request->product_variant as $key => $variant){
                 $variant_id = $variant['option'];
+
                  if(count($variant['value']) > 0){
                      foreach($variant['value'] as $value){
-                        //dd($variant_id);
-                        //$variant = ProductVariant::create(['variant'=>$value,'variant_id'=>$variant_id,'product_id'=>$productId]);
-                        //dd($variant);
-                        //$variantOpt[$key] = $variant->id;
+                        
+                        $variant = ProductVariant::create(['variant'=>$value,'variant_id'=>$variant_id,'product_id'=>$productId]);
+                        $variantOpt[$key][]=$variant->id;
                      }
                  }
             }
         }
-        //dd($request->product_preview[0]['price']);
-        // if(count($request->product_preview) > 0){
-        //     foreach ($request->product_preview as $key => $preview){
-        //         $preview['price'];
-        //     }
-        // }
+        
         $previewCount = count($request->product_preview);
         $c = 1;
-        dd(count($variantOpt[0]));
+        
         for ($one=0; $one < count($variantOpt[0]) ; $one++) { 
-            for ($two=0; $two < count($variantOpt[1]) ; $two++) { 
-                for ($three=0; $three < count($variantOpt[2]) ; $three++) { 
-                   if(($previewCount - $c) >= 0){
-                        ProductVariantPrice::create(['product_variant_one'=>$variantOpt[0][$one],'product_variant_two'=>$variantOpt[0][$two],'product_variant_three'=>$variantOpt[0][$three],'price'=>$request->product_preview[$c-1]['price'],'stock'=>$request->product_preview[$c-1]['stock'],'product_id'=>$productId]);
-                        $c++;
-                   }
+            if(isset($variantOpt[1])){
+                
+                for ($two=0; $two < count($variantOpt[1]) ; $two++) { 
+                    if(isset($variantOpt[2])){
+                        for ($three=0; $three < count($variantOpt[2]) ; $three++) { 
+                            if(($previewCount - $c) >= 0){
+                                    ProductVariantPrice::create(['product_variant_one'=>$variantOpt[0][$one],'product_variant_two'=>$variantOpt[1][$two],'product_variant_three'=>$variantOpt[2][$three],'price'=>$request->product_preview[$c-1]['price'],'stock'=>$request->product_preview[$c-1]['stock'],'product_id'=>$productId]);
+                                    $c++;
+                            }
+                        }
+                    }
+                    else{
+                        if(($previewCount - $c) >= 0){
+                                    ProductVariantPrice::create(['product_variant_one'=>$variantOpt[0][$one],'product_variant_two'=>$variantOpt[1][$two],'price'=>$request->product_preview[$c-1]['price'],'stock'=>$request->product_preview[$c-1]['stock'],'product_id'=>$productId]);
+                                    $c++;
+                        }
+                    }
+                
                 }
             }
+            else{
+                if(($previewCount - $c) >= 0){
+                        ProductVariantPrice::create(['product_variant_one'=>$variantOpt[0][$one],'price'=>$request->product_preview[$c-1]['price'],'stock'=>$request->product_preview[$c-1]['stock'],'product_id'=>$productId]);
+                        $c++;
+                }
+            }
+            
         }
+        return redirect()->route('product.index');
     }
 
 
